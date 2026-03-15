@@ -21,6 +21,7 @@ import {
   Command,
   Info
 } from 'lucide-react';
+import { useAuth } from '@/components/auth-provider';
 import { GoogleGenAI, Type, FunctionDeclaration } from '@google/genai';
 import { toast } from 'sonner';
 

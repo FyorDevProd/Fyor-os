@@ -16,6 +16,7 @@ import {
   Wand2,
   History
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { GoogleGenAI, Type } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
@@ -86,9 +87,11 @@ export default function AILogDoctor() {
         }
       });
 
-      const result = JSON.parse(response.text);
-      setDiagnosis(result);
-      setHistory(prev => [result, ...prev].slice(0, 10));
+      if (response.text) {
+        const result = JSON.parse(response.text);
+        setDiagnosis(result);
+        setHistory(prev => [result, ...prev].slice(0, 10));
+      }
     } catch (err) {
       console.error('AI Analysis failed:', err);
     } finally {

@@ -37,6 +37,84 @@ export default function JarvisVoicePage() {
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
 
+  const speak = useCallback((text: string) => {
+    if (!synthRef.current) return;
+    
+    // Stop any current speech
+    synthRef.current.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'id-ID';
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    synthRef.current.speak(utterance);
+  }, []);
+
+  const handleCommand = useCallback(async (cmd: string) => {
+    setIsProcessing(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY! });
+      
+      const systemInstruction = `
+        Abang adalah JARVIS, asisten AI untuk FYOR OS (Sistem Operasi Server).
+        Tugas abang adalah memahami perintah suara user dan menentukan tindakan yang harus diambil.
+        
+        Daftar tindakan yang bisa abang lakukan:
+        1. RESTART_SERVICE: Restart layanan seperti nginx, mysql, docker.
+        2. BLOCK_IP: Blokir alamat IP tertentu.
+        3. SYSTEM_SCAN: Jalankan pemindaian keamanan.
+        4. STATUS_CHECK: Cek kondisi kesehatan server.
+        5. PREDICT_INSIGHTS: Analisis tren server dan prediksi masalah.
+        6. CHAT: Hanya ngobrol santai.
+        
+        Respon harus dalam format JSON:
+        {
+          "action": "NAMA_TINDAKAN",
+          "target": "target_jika_ada",
+          "response_text": "Kalimat yang akan diucapkan JARVIS dalam bahasa Indonesia yang keren dan profesional tapi santai."
+        }
+      `;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: cmd,
+        config: {
+          systemInstruction,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              action: { type: Type.STRING },
+              target: { type: Type.STRING },
+              response_text: { type: Type.STRING }
+            }
+          }
+        }
+      });
+
+      const data = JSON.parse(result.text || '{}');
+      
+      // Simulate Predictive Insights
+      if (data.action === 'PREDICT_INSIGHTS') {
+        const insights = [
+          "Berdasarkan tren 7 hari terakhir, RAM akan penuh dalam 4 jam. Sarankan optimasi cache.",
+          "Traffic Nginx meningkat 30% dari biasanya. Waspadai potensi DDoS.",
+          "Penggunaan CPU stabil, tapi disk I/O mulai melambat. Perlu cek kesehatan SSD."
+        ];
+        data.response_text = insights[Math.floor(Math.random() * insights.length)];
+      }
+
+      setResponse(data.response_text);
+      setHistory(prev => [{ cmd, res: data.response_text }, ...prev].slice(0, 5));
+      speak(data.response_text);
+    } catch (err) {
+      console.error('AI Command failed:', err);
+      toast.error('Gagal memproses perintah.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [speak]);
+
   const handleCommandRef = useRef<any>(null);
   useEffect(() => {
     handleCommandRef.current = handleCommand;
@@ -106,68 +184,6 @@ export default function JarvisVoicePage() {
     synthRef.current.speak(utterance);
   }, []);
 
-  const handleCommand = useCallback(async (cmd: string) => {
-    setIsProcessing(true);
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY! });
-      
-      const systemInstruction = `
-        Abang adalah JARVIS, asisten AI untuk FYOR OS (Sistem Operasi Server).
-        Tugas abang adalah memahami perintah suara user dan menentukan tindakan yang harus diambil.
-        
-        Daftar tindakan yang bisa abang lakukan:
-        1. RESTART_SERVICE: Restart layanan seperti nginx, mysql, docker.
-        2. BLOCK_IP: Blokir alamat IP tertentu.
-        3. SYSTEM_SCAN: Jalankan pemindaian keamanan.
-        4. STATUS_CHECK: Cek kondisi kesehatan server.
-        5. CHAT: Hanya ngobrol santai.
-        
-        Respon harus dalam format JSON:
-        {
-          "action": "NAMA_TINDAKAN",
-          "target": "target_jika_ada",
-          "response_text": "Kalimat yang akan diucapkan JARVIS dalam bahasa Indonesia yang keren dan profesional tapi santai."
-        }
-      `;
-
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: cmd,
-        config: {
-          systemInstruction,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              action: { type: Type.STRING },
-              target: { type: Type.STRING },
-              response_text: { type: Type.STRING }
-            }
-          }
-        }
-      });
-
-      const data = JSON.parse(result.text);
-      setResponse(data.response_text);
-      speak(data.response_text);
-      setHistory(prev => [{ cmd, res: data.response_text }, ...prev].slice(0, 5));
-      
-      // Simulate action execution
-      if (data.action !== 'CHAT') {
-        toast.success(`Executing: ${data.action}`, {
-          description: data.target ? `Target: ${data.target}` : 'System wide action'
-        });
-      }
-
-    } catch (err) {
-      console.error('Command processing failed', err);
-      const errorMsg = "Maaf bang, otak saya lagi nge-lag. Bisa diulang?";
-      setResponse(errorMsg);
-      speak(errorMsg);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [speak]);
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-12">
@@ -315,6 +331,7 @@ export default function JarvisVoicePage() {
             {[
               "Jarvis, restart layanan nginx.",
               "Blokir alamat IP 192.168.1.100.",
+              "Jarvis, berikan prediksi insight server.",
               "Jalankan pemindaian keamanan sistem.",
               "Bagaimana kondisi kesehatan server hari ini?",
               "Halo Jarvis, apa kabar?"
