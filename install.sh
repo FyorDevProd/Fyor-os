@@ -24,25 +24,56 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# 2. Update sistem
-echo -e "${YELLOW}⏳ [1/7] Updating system packages...${NC}"
-apt-get update -y && apt-get upgrade -y
+# 2. Deteksi OS
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+    VER=$VERSION_ID
+else
+    OS=$(uname -s)
+fi
 
-# 3. Install dependencies dasar
-echo -e "${YELLOW}⏳ [2/7] Installing required dependencies (curl, git, build-essential)...${NC}"
-apt-get install -y curl git unzip build-essential ufw
+echo -e "${YELLOW}⏳ Detected OS: $OS $VER${NC}"
 
-# 4. Install Node.js (v20 LTS)
-echo -e "${YELLOW}⏳ [3/7] Installing Node.js (v20 LTS)...${NC}"
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt-get install -y nodejs
+# 3. Update sistem & Install Dependencies berdasarkan OS
+case "$OS" in
+    ubuntu|debian|raspbian)
+        echo -e "${YELLOW}⏳ [1/7] Updating system packages (APT)...${NC}"
+        apt-get update -y
+        apt-get install -y curl git unzip build-essential ufw certbot python3-certbot-nginx
+        
+        echo -e "${YELLOW}⏳ [2/7] Installing Node.js (v20 LTS)...${NC}"
+        curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+        apt-get install -y nodejs
+        ;;
+    centos|rhel|fedora|almalinux|rocky)
+        echo -e "${YELLOW}⏳ [1/7] Updating system packages (YUM/DNF)...${NC}"
+        yum update -y
+        yum install -y curl git unzip gcc-c++ make certbot python3-certbot-nginx
+        
+        echo -e "${YELLOW}⏳ [2/7] Installing Node.js (v20 LTS)...${NC}"
+        curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+        yum install -y nodejs
+        
+        # Firewall setup for CentOS
+        if command -v firewall-cmd >/dev/null; then
+            firewall-cmd --permanent --add-port=3000/tcp
+            firewall-cmd --permanent --add-port=22/tcp
+            firewall-cmd --reload
+        fi
+        ;;
+    *)
+        echo -e "${RED}❌ Error: OS $OS tidak didukung oleh script ini secara otomatis.${NC}"
+        exit 1
+        ;;
+esac
 
-# 5. Install PM2 secara global
+# 4. Install PM2 secara global
 echo -e "${YELLOW}⏳ [4/7] Installing PM2 (Process Manager)...${NC}"
 npm install -g pm2
 
 # 6. Setup Direktori dan Download Source Code
-INSTALL_DIR="/opt/fyor-os"
+INSTALL_DIR="/www/wwwroot/fyoros"
 echo -e "${YELLOW}⏳ [5/7] Setting up FYOR OS directory at ${INSTALL_DIR}...${NC}"
 
 if [ -d "$INSTALL_DIR" ]; then
@@ -51,7 +82,7 @@ if [ -d "$INSTALL_DIR" ]; then
 fi
 
 # GANTI URL DI BAWAH INI DENGAN URL GITHUB REPOSITORY ABANG NANTINYA
-REPO_URL="https://github.com/username-abang/fyor-os.git"
+REPO_URL="https://github.com/FyorDevProd/Fyor-os.git"
 
 echo -e "${YELLOW}⏳ Downloading FYOR OS source code...${NC}"
 # Jika belum ada github, kita buat folder kosong dulu sebagai placeholder

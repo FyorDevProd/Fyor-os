@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/components/auth-provider';
 import { toast } from 'sonner';
 import { 
@@ -21,8 +21,15 @@ import {
   Search,
   Eye,
   Zap,
-  Download
+  Download,
+  BrainCircuit,
+  Sparkles,
+  Loader2,
+  Wand2
 } from 'lucide-react';
+import { GoogleGenAI, Type } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
 
 const mockFirewallRules = [
   { id: 1, name: 'SSH', port: '22', protocol: 'TCP', action: 'ALLOW', source: 'Anywhere' },
@@ -45,10 +52,30 @@ export default function SecurityPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [activeTab, setActiveTab] = useState<'firewall' | 'audit' | 'hardening'>('firewall');
 
+  const [aiOptimization, setAiOptimization] = useState<string | null>(null);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+
+  const optimizeFirewall = async () => {
+    setIsOptimizing(true);
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Analyze these firewall rules and suggest security optimizations: ${JSON.stringify(mockFirewallRules)}. Provide a concise list of recommendations.`,
+      });
+      setAiOptimization(response.text);
+      toast.success('AI Optimizer: Analysis Complete');
+    } catch (err) {
+      console.error('AI Optimization failed:', err);
+      toast.error('AI Optimizer Error', { description: 'Failed to analyze firewall rules.' });
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
   const handleDemoAction = (action: string) => {
     if (isDemo) {
-      toast.error('Access Denied', {
-        description: `Action "${action}" is disabled in Demo Mode.`
+      toast.success(`Simulation: ${action}`, {
+        description: `Action "${action}" was simulated in Demo Mode.`
       });
       return true;
     }
@@ -73,23 +100,61 @@ export default function SecurityPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 flex items-center gap-3">
-            <ShieldCheck className="w-8 h-8 text-emerald-400" />
-            Security & Firewall
-          </h1>
-          <p className="text-slate-400 font-mono text-sm mt-1">Protect your infrastructure with advanced hardening.</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 flex items-center gap-3">
+              <ShieldCheck className="w-8 h-8 text-emerald-400" />
+              Security & Firewall
+            </h1>
+            <p className="text-slate-400 font-mono text-sm mt-1">Protect your infrastructure with advanced hardening.</p>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={optimizeFirewall}
+              disabled={isOptimizing}
+              className="px-4 py-2.5 bg-cyan-500/10 border border-cyan-500/50 rounded-xl text-cyan-400 font-mono text-sm font-bold hover:bg-cyan-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+            >
+              {isOptimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4" />}
+              AI OPTIMIZER
+            </button>
+            <button 
+              onClick={runSecurityScan}
+              disabled={isScanning}
+              className="px-6 py-2.5 bg-emerald-500/10 border border-emerald-500/50 rounded-xl text-emerald-400 font-mono text-sm font-bold hover:bg-emerald-500/20 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all flex items-center gap-2 disabled:opacity-50"
+            >
+              {isScanning ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+              {isScanning ? 'SCANNING...' : 'RUN SECURITY AUDIT'}
+            </button>
+          </div>
         </div>
-        <button 
-          onClick={runSecurityScan}
-          disabled={isScanning}
-          className="px-6 py-2.5 bg-emerald-500/10 border border-emerald-500/50 rounded-xl text-emerald-400 font-mono text-sm font-bold hover:bg-emerald-500/20 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all flex items-center gap-2 disabled:opacity-50"
-        >
-          {isScanning ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-          {isScanning ? 'SCANNING...' : 'RUN SECURITY AUDIT'}
-        </button>
-      </div>
+
+        <AnimatePresence>
+          {aiOptimization && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-cyan-900/20 to-emerald-900/20 border border-cyan-500/30 rounded-2xl p-6 relative">
+                <div className="absolute top-4 right-4">
+                  <button onClick={() => setAiOptimization(null)} className="text-slate-500 hover:text-white transition-colors">×</button>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-cyan-500/20 rounded-xl">
+                    <Sparkles className="w-6 h-6 text-cyan-400 animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-cyan-400 uppercase tracking-widest mb-2">AI Firewall Optimization Insights</h3>
+                    <div className="text-sm text-slate-200 font-mono leading-relaxed whitespace-pre-wrap">
+                      {aiOptimization}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       {/* Security Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -92,9 +92,10 @@ export default function ProcessesPage() {
 
   const killProcess = async (pid: number, name: string) => {
     if (isDemo) {
-      toast.error('Access Denied', {
-        description: 'Killing processes is disabled in Demo Mode.'
+      toast.success(`Simulation: Process ${name} terminated`, {
+        description: `PID ${pid} was virtually killed in Demo Mode.`
       });
+      setProcesses(prev => prev.filter(p => p.pid !== pid));
       return;
     }
 

@@ -2,13 +2,41 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Globe, Plus, Github, Shield, Play, RotateCw, Trash2, ExternalLink } from 'lucide-react';
+import { Globe, Plus, Github, Shield, Play, RotateCw, Trash2, ExternalLink, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function WebsitesPage() {
   const [websites, setWebsites] = useState([
     { id: '1', domain: 'fyor.dev', status: 'active', ssl: true, repo: 'fyor/landing', framework: 'Next.js' },
     { id: '2', domain: 'api.fyor.dev', status: 'deploying', ssl: false, repo: 'fyor/api', framework: 'Node.js' },
   ]);
+  const [installingSSL, setInstallingSSL] = useState<string | null>(null);
+
+  const handleInstallSSL = async (domain: string, id: string) => {
+    setInstallingSSL(id);
+    toast.info(`Starting SSL installation for ${domain}...`);
+
+    try {
+      const res = await fetch('/api/ssl/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success(data.message);
+        setWebsites(prev => prev.map(w => w.id === id ? { ...w, ssl: true } : w));
+      } else {
+        toast.error(data.error || 'Failed to install SSL');
+      }
+    } catch (err) {
+      toast.error('Network error during SSL installation');
+    } finally {
+      setInstallingSSL(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -84,8 +112,17 @@ export default function WebsitesPage() {
                 <button className="flex-1 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-mono uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
                   <RotateCw className="w-3 h-3" /> Redeploy
                 </button>
-                <button className="flex-1 py-2 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-lg text-xs font-mono uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
-                  <Shield className="w-3 h-3" /> {site.ssl ? 'Renew SSL' : 'Install SSL'}
+                <button 
+                  onClick={() => handleInstallSSL(site.domain, site.id)}
+                  disabled={installingSSL === site.id}
+                  className="flex-1 py-2 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-lg text-xs font-mono uppercase tracking-widest transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {installingSSL === site.id ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Shield className="w-3 h-3" />
+                  )}
+                  {installingSSL === site.id ? 'Installing...' : site.ssl ? 'Renew SSL' : 'Install SSL'}
                 </button>
                 <button className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg transition-colors">
                   <Trash2 className="w-4 h-4" />

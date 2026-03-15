@@ -23,8 +23,13 @@ export default function LandingPage() {
     }
   };
 
+  const [installOS, setInstallOS] = useState<'linux' | 'windows'>('linux');
+
   const handleCopy = () => {
-    navigator.clipboard.writeText('curl -sSO https://fyor.os/install.sh && bash install.sh');
+    const command = installOS === 'linux' 
+      ? 'curl -sSO https://raw.githubusercontent.com/FyorDevProd/Fyor-os/main/install.sh && bash install.sh'
+      : 'iwr https://raw.githubusercontent.com/FyorDevProd/Fyor-os/main/install.ps1 -useb | iex';
+    navigator.clipboard.writeText(command);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -39,9 +44,9 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-100 font-sans selection:bg-cyan-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#050505] text-slate-900 dark:text-slate-100 font-sans selection:bg-cyan-500/30 overflow-x-hidden">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/10">
+      <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -61,16 +66,18 @@ export default function LandingPage() {
             className="hidden md:flex items-center gap-10"
           >
             <div className="flex items-center gap-8 text-sm font-mono tracking-widest uppercase">
-              <Link href="#features" className="text-slate-400 hover:text-cyan-400 transition-colors">Features</Link>
-              <Link href="#pricing" className="text-slate-400 hover:text-fuchsia-400 transition-colors">Pricing</Link>
-              <Link href="#docs" className="text-slate-400 hover:text-cyan-400 transition-colors">Docs</Link>
+              <Link href="#features" className="text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">Features</Link>
+              <Link href="#pricing" className="text-slate-500 dark:text-slate-400 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 transition-colors">Pricing</Link>
+              <Link href="#docs" className="text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">Docs</Link>
             </div>
             
-            <div className="flex items-center gap-6 pl-8 border-l border-white/10">
+            <div className="flex items-center gap-6 pl-8 border-l border-slate-200 dark:border-white/10">
+              <ThemeToggle />
+              
               {/* Mode Toggle Pill */}
               <button 
                 onClick={() => setIsDemoMode(!isDemoMode)}
-                className="relative flex items-center p-1 rounded-full bg-white/5 border border-white/10 overflow-hidden group"
+                className="relative flex items-center p-1 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 overflow-hidden group"
               >
                 <div className={`px-4 py-1.5 rounded-full text-xs font-black tracking-widest transition-all duration-300 ${isDemoMode ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.5)]' : 'text-slate-500'}`}>
                   DEMO
@@ -388,9 +395,28 @@ export default function LandingPage() {
           >
             <h2 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight">Ready to take control?</h2>
             <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">Install FYOR OS on your server in less than 2 minutes with our simple installation script.</p>
+            
+            <div className="flex justify-center gap-4 mb-8">
+              <button 
+                onClick={() => setInstallOS('linux')}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${installOS === 'linux' ? 'bg-white text-blue-900 shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
+              >
+                Linux (Ubuntu/Debian/CentOS)
+              </button>
+              <button 
+                onClick={() => setInstallOS('windows')}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${installOS === 'windows' ? 'bg-white text-blue-900 shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
+              >
+                Windows (PowerShell)
+              </button>
+            </div>
+
             <div className="inline-flex items-center gap-4 p-2 pr-4 bg-black/40 backdrop-blur-md rounded-full border border-white/20 shadow-2xl">
               <div className="px-4 py-2 bg-white/10 rounded-full font-mono text-sm overflow-x-auto max-w-[250px] sm:max-w-none whitespace-nowrap">
-                curl -sSO https://fyor.os/install.sh && bash install.sh
+                {installOS === 'linux' 
+                  ? 'curl -sSO https://raw.githubusercontent.com/FyorDevProd/Fyor-os/main/install.sh && bash install.sh'
+                  : 'iwr https://raw.githubusercontent.com/FyorDevProd/Fyor-os/main/install.ps1 -useb | iex'
+                }
               </div>
               <button 
                 onClick={handleCopy}

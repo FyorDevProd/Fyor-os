@@ -18,22 +18,26 @@ import {
   CheckCircle2,
   Loader2,
   Filter,
+  Github,
   LayoutGrid,
   List
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/components/auth-provider';
+import { AdBanner } from '@/components/ad-banner';
 
 interface App {
   id: string;
   name: string;
   description: string;
-  category: 'Web' | 'Database' | 'Tool' | 'CMS';
+  category: 'Web' | 'Database' | 'Tool' | 'CMS' | 'Security' | 'AI' | 'Plugin' | 'AI & ML';
   icon: any;
   image: string;
   stars: number;
   downloads: string;
   version: string;
+  price?: number;
+  isPro?: boolean;
 }
 
 const apps: App[] = [
@@ -93,6 +97,28 @@ const apps: App[] = [
     version: '7.0.5'
   },
   {
+    id: 'mysql',
+    name: 'MySQL',
+    description: 'The world\'s most popular open-source relational database.',
+    category: 'Database',
+    icon: Database,
+    image: 'https://picsum.photos/seed/mysql/400/200',
+    stars: 4.8,
+    downloads: '15M+',
+    version: '8.0.36'
+  },
+  {
+    id: 'postgresql',
+    name: 'PostgreSQL',
+    description: 'The world\'s most advanced open source relational database.',
+    category: 'Database',
+    icon: Database,
+    image: 'https://picsum.photos/seed/postgres/400/200',
+    stars: 4.9,
+    downloads: '12M+',
+    version: '16.2'
+  },
+  {
     id: 'redis',
     name: 'Redis',
     description: 'In-memory data structure store, used as a database and cache.',
@@ -115,6 +141,17 @@ const apps: App[] = [
     version: '4.20.1'
   },
   {
+    id: 'directus',
+    name: 'Directus',
+    description: 'Open-source data platform that turns any SQL database into an API.',
+    category: 'CMS',
+    icon: LayoutGrid,
+    image: 'https://picsum.photos/seed/directus/400/200',
+    stars: 4.8,
+    downloads: '400K+',
+    version: '10.10.0'
+  },
+  {
     id: 'uptime-kuma',
     name: 'Uptime Kuma',
     description: 'A self-hosted monitoring tool like "Uptime Robot".',
@@ -124,6 +161,194 @@ const apps: App[] = [
     stars: 4.9,
     downloads: '300K+',
     version: '1.23.11'
+  },
+  {
+    id: 'portainer',
+    name: 'Portainer',
+    description: 'Making Docker and Kubernetes management easy.',
+    category: 'Tool',
+    icon: Rocket,
+    image: 'https://picsum.photos/seed/portainer/400/200',
+    stars: 4.8,
+    downloads: '5M+',
+    version: '2.19.4'
+  },
+  {
+    id: 'gitea',
+    name: 'Gitea',
+    description: 'A painless self-hosted Git service. Lightweight and fast.',
+    category: 'Tool',
+    icon: Github,
+    image: 'https://picsum.photos/seed/gitea/400/200',
+    stars: 4.7,
+    downloads: '1M+',
+    version: '1.21.7'
+  },
+  {
+    id: 'minio',
+    name: 'MinIO',
+    description: 'High Performance, Kubernetes Native Object Storage.',
+    category: 'Tool',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/minio/400/200',
+    stars: 4.8,
+    downloads: '3M+',
+    version: '2024.2.24'
+  },
+  {
+    id: 'grafana',
+    name: 'Grafana',
+    description: 'The open observability platform for every stack.',
+    category: 'Tool',
+    icon: Activity,
+    image: 'https://picsum.photos/seed/grafana/400/200',
+    stars: 4.9,
+    downloads: '10M+',
+    version: '10.3.3'
+  },
+  {
+    id: 'pocketbase',
+    name: 'PocketBase',
+    description: 'Open source backend in 1 file with realtime database and auth.',
+    category: 'Database',
+    icon: Database,
+    image: 'https://picsum.photos/seed/pocketbase/400/200',
+    stars: 4.9,
+    downloads: '200K+',
+    version: '0.21.1'
+  },
+  {
+    id: 'umami',
+    name: 'Umami',
+    description: 'Umami is a simple, fast, privacy-focused alternative to Google Analytics.',
+    category: 'Tool',
+    icon: Activity,
+    image: 'https://picsum.photos/seed/umami/400/200',
+    stars: 4.8,
+    downloads: '150K+',
+    version: '2.10.2'
+  },
+  {
+    id: 'react-starter',
+    name: 'React Starter',
+    description: 'Clean React template with Tailwind CSS and Vite.',
+    category: 'Web',
+    icon: Rocket,
+    image: 'https://picsum.photos/seed/react/400/200',
+    stars: 4.5,
+    downloads: '50K+',
+    version: '1.0.0'
+  },
+  {
+    id: 'nextjs-starter',
+    name: 'Next.js Starter',
+    description: 'Production-ready Next.js template with App Router.',
+    category: 'Web',
+    icon: Globe,
+    image: 'https://picsum.photos/seed/nextjs/400/200',
+    stars: 4.9,
+    downloads: '100K+',
+    version: '14.1.0'
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama',
+    description: 'Get up and running with Llama 3, Mistral, Gemma, and other large language models locally.',
+    category: 'AI & ML',
+    icon: Zap,
+    image: 'https://picsum.photos/seed/ollama/400/200',
+    stars: 4.9,
+    downloads: '2M+',
+    version: '0.1.30',
+    isPro: true
+  },
+  {
+    id: 'n8n',
+    name: 'n8n',
+    description: 'Fair-code licensed workflow automation tool. Easily automate tasks across different services.',
+    category: 'AI & ML',
+    icon: Activity,
+    image: 'https://picsum.photos/seed/n8n/400/200',
+    stars: 4.8,
+    downloads: '1M+',
+    version: '1.33.1',
+    isPro: true
+  },
+  {
+    id: 'chromadb',
+    name: 'ChromaDB',
+    description: 'The AI-native open-source embedding database. Fast, simple, and scalable.',
+    category: 'AI & ML',
+    icon: Database,
+    image: 'https://picsum.photos/seed/chroma/400/200',
+    stars: 4.7,
+    downloads: '500K+',
+    version: '0.4.24',
+    isPro: true
+  },
+  {
+    id: 'huggingface-tgi',
+    name: 'HF Text Generation',
+    description: 'Toolkit for deploying and serving Large Language Models (LLMs) efficiently.',
+    category: 'AI & ML',
+    icon: Rocket,
+    image: 'https://picsum.photos/seed/hftgi/400/200',
+    stars: 4.8,
+    downloads: '100K+',
+    version: '1.4.0',
+    isPro: true
+  },
+  {
+    id: 'fyor-firewall-pro',
+    name: 'Fyor Firewall Pro',
+    description: 'Enterprise-grade WAF and DDoS protection for your server.',
+    category: 'Security',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/firewall/400/200',
+    stars: 5.0,
+    downloads: '1K+',
+    version: '2.4.0',
+    price: 49,
+    isPro: true
+  },
+  {
+    id: 'ai-log-doctor-pro',
+    name: 'AI Log Doctor Pro',
+    description: 'Advanced AI analysis for system logs with auto-fix suggestions.',
+    category: 'Plugin',
+    icon: Zap,
+    image: 'https://picsum.photos/seed/aidoctor/400/200',
+    stars: 4.9,
+    downloads: '5K+',
+    version: '1.2.0',
+    price: 19,
+    isPro: true
+  },
+  {
+    id: 'cloud-sync-pro',
+    name: 'Cloud Sync Pro',
+    description: 'Real-time multi-cloud backup synchronization (S3, Drive, Dropbox).',
+    category: 'Tool',
+    icon: Rocket,
+    image: 'https://picsum.photos/seed/cloudsync/400/200',
+    stars: 4.8,
+    downloads: '2K+',
+    version: '3.1.5',
+    price: 29,
+    isPro: true
+  },
+  {
+    id: 'seo-optimizer-plugin',
+    name: 'SEO Optimizer Plugin',
+    description: 'Automatically optimize your website meta tags, sitemaps, and images for search engines.',
+    category: 'Plugin',
+    icon: Globe,
+    image: 'https://picsum.photos/seed/seo/400/200',
+    stars: 4.7,
+    downloads: '3K+',
+    version: '1.0.5',
+    price: 15,
+    isPro: true
   }
 ];
 
@@ -135,19 +360,31 @@ export default function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [deployingId, setDeployingId] = useState<string | null>(null);
 
-  const categories = ['All', 'Web', 'Database', 'Tool', 'CMS'];
+  const categories = ['All', 'AI & ML', 'Web', 'Database', 'Tool', 'CMS', 'Security', 'Plugin', 'Premium'];
 
   const filteredApps = apps.filter(app => {
     const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          app.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || app.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'All' || 
+                          (selectedCategory === 'Premium' ? app.isPro : app.category === selectedCategory);
     return matchesSearch && matchesCategory;
   });
 
   const handleDeploy = async (app: App) => {
     if (isDemo) {
-      toast.error('Access Denied', {
-        description: 'App deployment is disabled in Demo Mode.'
+      setDeployingId(app.id);
+      setTimeout(() => {
+        setDeployingId(null);
+        toast.success(`Simulation: ${app.name} Deployed`, {
+          description: `In a real environment, ${app.name} would be pulled and started via Docker. Container ID: sim-${Math.random().toString(36).substring(7)}`
+        });
+      }, 2000);
+      return;
+    }
+
+    if (app.isPro) {
+      toast.info(`Premium App: ${app.name}`, {
+        description: `This is a Pro feature ($${app.price}/mo). Redirecting to payment...`
       });
       return;
     }
@@ -222,6 +459,8 @@ export default function MarketplacePage() {
         </div>
       </div>
 
+      <AdBanner dataAdSlot="0987654321" />
+
       {/* App Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
         <AnimatePresence mode="popLayout">
@@ -245,10 +484,15 @@ export default function MarketplacePage() {
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60" />
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-4 left-4 flex gap-2">
                   <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-widest">
                     {app.category}
                   </span>
+                  {app.isPro && (
+                    <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-600 backdrop-blur-md border border-amber-400/50 rounded-full text-[10px] font-mono font-bold text-white uppercase tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+                      PRO
+                    </span>
+                  )}
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -271,7 +515,9 @@ export default function MarketplacePage() {
                     </div>
                     <div>
                       <h3 className="text-lg font-black text-white tracking-tighter">{app.name}</h3>
-                      <p className="text-[10px] font-mono text-slate-500 uppercase">v{app.version}</p>
+                      <p className="text-[10px] font-mono text-slate-500 uppercase">
+                        {app.price ? `$${app.price}/mo` : `v${app.version}`}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -290,6 +536,11 @@ export default function MarketplacePage() {
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         DEPLOYING...
+                      </>
+                    ) : app.isPro ? (
+                      <>
+                        <Zap className="w-4 h-4" />
+                        UPGRADE TO PRO
                       </>
                     ) : (
                       <>

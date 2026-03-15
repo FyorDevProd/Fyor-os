@@ -446,6 +446,22 @@ app.prepare().then(() => {
     }
   });
 
+  server.get('/api/system-logs', async (req, res) => {
+    try {
+      // Try to get some real logs, fallback to mock if fails
+      const { stdout } = await execPromise('tail -n 50 /var/log/syslog 2>/dev/null || journalctl -n 50 --no-pager 2>/dev/null || echo "Mock: System initialized\nMock: Nginx started\nMock: Database connection established"');
+      const logs = stdout.split('\n').filter(l => l.trim()).map((line, i) => ({
+        id: i.toString(),
+        timestamp: new Date().toISOString(),
+        message: line,
+        source: 'system'
+      }));
+      res.json(logs);
+    } catch (e) {
+      res.json([{ id: '1', timestamp: new Date().toISOString(), message: 'Error reading system logs', source: 'error' }]);
+    }
+  });
+
   server.get('/api/war-room/attacks', async (req, res) => {
     try {
       // Parse real failed SSH attempts to find attackers
@@ -535,6 +551,49 @@ app.prepare().then(() => {
     
     saveTamagotchi();
     res.json(tamagotchiState);
+  });
+
+  server.post('/api/ssl/install', async (req, res) => {
+    const { domain, email } = req.body || {};
+    if (!domain) return res.status(400).json({ error: 'Domain is required' });
+    
+    // Basic domain validation
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+    if (!domainRegex.test(domain)) {
+      return res.status(400).json({ error: 'Invalid domain format' });
+    }
+
+    const certEmail = email || 'admin@' + domain;
+
+    try {
+      // 1. Check if certbot is installed
+      try {
+        await execPromise('certbot --version');
+      } catch (e) {
+        // Install certbot if missing
+        await execPromise('apt-get update && apt-get install -y certbot python3-certbot-nginx');
+      }
+
+      // 2. Run certbot
+      // We use --nginx plugin for automatic configuration
+      // Note: This requires Nginx to be running and configured for the domain
+      const { stdout, stderr } = await execPromise(`certbot --nginx -d ${domain} --non-interactive --agree-tos --email ${certEmail} --redirect`);
+      
+      console.log('Certbot output:', stdout);
+      if (stderr) console.warn('Certbot warning:', stderr);
+
+      res.json({ 
+        success: true, 
+        message: `SSL certificate for ${domain} has been installed successfully.`,
+        output: stdout
+      });
+    } catch (err: any) {
+      console.error('SSL Installation failed:', err);
+      res.status(500).json({ 
+        error: 'SSL Installation failed. Ensure your domain points to this server and Nginx is configured.',
+        details: err.message 
+      });
+    }
   });
 
   server.all(/.*/, (req, res) => {

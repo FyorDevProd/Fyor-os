@@ -112,9 +112,10 @@ export default function SecurityAuditorPage() {
 
   const blockIp = async (ip: string) => {
     if (isDemo) {
-      toast.error('Access Denied', {
-        description: 'Firewall actions are disabled in Demo Mode.'
+      toast.success(`Simulation: IP ${ip} blocked`, {
+        description: 'Firewall rule added to virtual stack.'
       });
+      setEvents(prev => prev.map(e => e.source === ip ? { ...e, status: 'resolved' } : e));
       return;
     }
 

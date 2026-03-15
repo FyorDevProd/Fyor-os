@@ -25,54 +25,60 @@ import {
   Cpu,
   Crosshair,
   Ghost,
-  Mic
+  Mic,
+  Stethoscope,
+  Wand2
 } from 'lucide-react';
 import { useAuth } from './auth-provider';
+import { useLanguage } from './language-provider';
+import { LanguageSwitcher } from './language-switcher';
 
 const navGroups = [
   {
-    title: 'Core AI',
+    titleKey: 'group.core_ai',
     items: [
-      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { name: 'AI Assistant', href: '/assistant', icon: Bot },
-      { name: 'Jarvis Voice', href: '/jarvis', icon: Mic },
-      { name: 'War Room', href: '/war-room', icon: Crosshair },
-      { name: 'Server Life', href: '/tamagotchi', icon: Ghost },
-      { name: 'Autonomous Core', href: '/autonomous', icon: Cpu },
+      { nameKey: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { nameKey: 'nav.ai_utilities', href: '/ai-utilities', icon: Wand2, free: true },
+      { nameKey: 'nav.ai_assistant', href: '/assistant', icon: Bot, pro: true },
+      { nameKey: 'nav.jarvis_voice', href: '/jarvis', icon: Mic, pro: true },
+      { nameKey: 'nav.war_room', href: '/war-room', icon: Crosshair, pro: true },
+      { nameKey: 'nav.server_life', href: '/tamagotchi', icon: Ghost, pro: true },
+      { nameKey: 'nav.autonomous', href: '/autonomous', icon: Cpu, pro: true },
+      { nameKey: 'nav.log_doctor', href: '/ai-log-doctor', icon: Stethoscope, pro: true },
     ]
   },
   {
-    title: 'Management',
+    titleKey: 'group.management',
     items: [
-      { name: 'Servers', href: '/servers', icon: Server },
-      { name: 'Websites', href: '/websites', icon: Globe },
-      { name: 'Databases', href: '/databases', icon: Database },
-      { name: 'Docker', href: '/docker', icon: Container },
-      { name: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
+      { nameKey: 'nav.servers', href: '/servers', icon: Server },
+      { nameKey: 'nav.websites', href: '/websites', icon: Globe },
+      { nameKey: 'nav.databases', href: '/databases', icon: Database },
+      { nameKey: 'nav.docker', href: '/docker', icon: Container },
+      { nameKey: 'nav.marketplace', href: '/marketplace', icon: ShoppingBag },
     ]
   },
   {
-    title: 'System',
+    titleKey: 'group.system',
     items: [
-      { name: 'Terminal', href: '/terminal', icon: Terminal },
-      { name: 'Processes', href: '/processes', icon: Activity },
-      { name: 'Services', href: '/services', icon: ListChecks },
-      { name: 'Network', href: '/network', icon: Globe },
-      { name: 'Logs', href: '/logs', icon: ScrollText },
-      { name: 'Automation', href: '/automation', icon: Zap },
+      { nameKey: 'nav.terminal', href: '/terminal', icon: Terminal },
+      { nameKey: 'nav.processes', href: '/processes', icon: Activity },
+      { nameKey: 'nav.services', href: '/services', icon: ListChecks },
+      { nameKey: 'nav.network', href: '/network', icon: Globe },
+      { nameKey: 'nav.logs', href: '/logs', icon: ScrollText },
+      { nameKey: 'nav.automation', href: '/automation', icon: Zap },
     ]
   },
   {
-    title: 'Security',
+    titleKey: 'group.security',
     items: [
-      { name: 'Security Auditor', href: '/security-auditor', icon: ShieldCheck },
-      { name: 'Security', href: '/security', icon: ShieldAlert },
+      { nameKey: 'nav.security_auditor', href: '/security-auditor', icon: ShieldCheck },
+      { nameKey: 'nav.security', href: '/security', icon: ShieldAlert },
     ]
   },
   {
-    title: 'Config',
+    titleKey: 'group.config',
     items: [
-      { name: 'Settings', href: '/settings', icon: Settings },
+      { nameKey: 'nav.settings', href: '/settings', icon: Settings },
     ]
   }
 ];
@@ -90,6 +96,7 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <>
@@ -126,10 +133,10 @@ export function Sidebar({
         
         <nav className="flex-1 px-4 space-y-6 overflow-y-auto overflow-x-hidden custom-scrollbar pb-8">
           {navGroups.map((group) => (
-            <div key={group.title} className="space-y-2">
+            <div key={group.titleKey} className="space-y-2">
               {(!isCollapsed || isOpen) && (
                 <h3 className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">
-                  {group.title}
+                  {t(group.titleKey)}
                 </h3>
               )}
               <div className="space-y-1">
@@ -137,10 +144,10 @@ export function Sidebar({
                   const isActive = pathname === item.href;
                   return (
                     <Link
-                      key={item.name}
+                      key={item.nameKey}
                       href={item.href}
                       onClick={() => setIsOpen(false)}
-                      title={isCollapsed ? item.name : undefined}
+                      title={isCollapsed ? t(item.nameKey) : undefined}
                       className={`flex items-center gap-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                         isCollapsed && !isOpen ? 'lg:justify-center px-0' : 'px-3'
                       } ${
@@ -150,7 +157,17 @@ export function Sidebar({
                       }`}
                     >
                       <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
-                      {(!isCollapsed || isOpen) && <span className="truncate">{item.name}</span>}
+                      {(!isCollapsed || isOpen) && (
+                        <>
+                          <span className="truncate">{t(item.nameKey)}</span>
+                          {(item as any).pro && (
+                            <span className="ml-auto text-[8px] font-black bg-gradient-to-r from-amber-400 to-rose-500 text-black px-1.5 py-0.5 rounded-full tracking-tighter">PRO</span>
+                          )}
+                          {(item as any).free && (
+                            <span className="ml-auto text-[8px] font-black bg-gradient-to-r from-emerald-400 to-cyan-500 text-black px-1.5 py-0.5 rounded-full tracking-tighter">FREE</span>
+                          )}
+                        </>
+                      )}
                     </Link>
                   );
                 })}
@@ -159,16 +176,17 @@ export function Sidebar({
           ))}
         </nav>
 
-        <div className="p-4 border-t border-cyan-500/20">
+        <div className="p-4 border-t border-cyan-500/20 space-y-4">
+          {(!isCollapsed || isOpen) && <LanguageSwitcher />}
           <button
             onClick={logout}
-            title={isCollapsed ? 'Disconnect' : undefined}
+            title={isCollapsed ? t('nav.disconnect') : undefined}
             className={`flex items-center gap-3 py-2.5 w-full rounded-lg text-sm font-medium text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors ${
               isCollapsed && !isOpen ? 'lg:justify-center px-0' : 'px-3'
             }`}
           >
             <LogOut className="w-5 h-5 shrink-0" />
-            {(!isCollapsed || isOpen) && <span>Disconnect</span>}
+            {(!isCollapsed || isOpen) && <span>{t('nav.disconnect')}</span>}
           </button>
         </div>
       </div>

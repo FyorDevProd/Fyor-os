@@ -18,10 +18,16 @@ import {
   AlertCircle,
   CheckCircle2,
   XCircle,
-  Clock
+  Clock,
+  BrainCircuit,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/components/auth-provider';
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
 
 interface Service {
   name: string;
@@ -38,6 +44,27 @@ export default function ServicesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const [aiPrediction, setAiPrediction] = useState<string | null>(null);
+  const [isPredicting, setIsPredicting] = useState(false);
+
+  const predictHealth = async () => {
+    if (services.length === 0) return;
+    setIsPredicting(true);
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Analyze these service stats and predict potential health issues or resource bottlenecks: ${JSON.stringify(services)}. Provide a concise prediction.`,
+      });
+      setAiPrediction(response.text);
+      toast.success('AI Predictor: Analysis Complete');
+    } catch (err) {
+      console.error('AI Prediction failed:', err);
+      toast.error('AI Predictor Error', { description: 'Failed to predict service health.' });
+    } finally {
+      setIsPredicting(false);
+    }
+  };
 
   const fetchServices = async () => {
     try {
@@ -61,8 +88,8 @@ export default function ServicesPage() {
 
   const handleAction = async (name: string, action: 'start' | 'stop' | 'restart') => {
     if (isDemo) {
-      toast.error('Access Denied', {
-        description: 'Service management is disabled in Demo Mode.'
+      toast.success(`Simulation: ${action} ${name}`, {
+        description: `Service ${name} ${action}ed in virtual environment.`
       });
       return;
     }
@@ -103,6 +130,14 @@ export default function ServicesPage() {
           <p className="text-slate-400 font-mono text-sm mt-1">Control systemd units and background services.</p>
         </div>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={predictHealth}
+            disabled={isPredicting || services.length === 0}
+            className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/50 rounded-xl text-cyan-400 font-mono text-xs font-bold hover:bg-cyan-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+          >
+            {isPredicting ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4" />}
+            AI PREDICTOR
+          </button>
           <div className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-xl flex items-center gap-2">
             <Clock className="w-4 h-4 text-cyan-400" />
             <span className="text-xs font-mono text-cyan-400 uppercase tracking-widest">Uptime: 14d 2h 15m</span>
@@ -115,6 +150,34 @@ export default function ServicesPage() {
           </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {aiPrediction && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-cyan-900/20 to-emerald-900/20 border border-cyan-500/30 rounded-2xl p-6 relative">
+              <div className="absolute top-4 right-4">
+                <button onClick={() => setAiPrediction(null)} className="text-slate-500 hover:text-white transition-colors">×</button>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-cyan-500/20 rounded-xl">
+                  <Sparkles className="w-6 h-6 text-cyan-400 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-black text-cyan-400 uppercase tracking-widest mb-2">AI Service Health Prediction</h3>
+                  <div className="text-sm text-slate-200 font-mono leading-relaxed italic">
+                    &quot;{aiPrediction}&quot;
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

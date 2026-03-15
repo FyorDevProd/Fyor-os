@@ -19,11 +19,17 @@ import {
   Lock,
   Cpu,
   ShieldCheck,
-  Map as MapIcon
+  Map as MapIcon,
+  BrainCircuit,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { toast } from 'sonner';
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
 
 interface Attack {
   id: string;
@@ -41,6 +47,26 @@ export default function WarRoomPage() {
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const svgRef = useRef<SVGSVGElement>(null);
   const [rotation, setRotation] = useState(0);
+
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const analyzeThreats = async () => {
+    if (attacks.length === 0) return;
+    setIsAnalyzing(true);
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Analyze these current server attack vectors and provide a brief strategic assessment (max 100 words): ${JSON.stringify(attacks)}`,
+      });
+      setAiAnalysis(response.text);
+    } catch (err) {
+      console.error('AI Analysis failed:', err);
+      toast.error('AI Intel Error', { description: 'Failed to analyze global threats.' });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   // Handle Resize
   useEffect(() => {
@@ -222,6 +248,14 @@ export default function WarRoomPage() {
           </div>
         </div>
         <div className="flex items-center gap-6">
+          <button 
+            onClick={analyzeThreats}
+            disabled={isAnalyzing || attacks.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/50 rounded-xl font-mono text-xs tracking-widest transition-all disabled:opacity-50"
+          >
+            {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4" />}
+            AI INTEL
+          </button>
           <div className="text-right">
             <span className="text-[10px] text-slate-500 uppercase block">System Time</span>
             <span className="text-xl font-black text-white">{new Date().toLocaleTimeString()}</span>
@@ -233,6 +267,33 @@ export default function WarRoomPage() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {aiAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mb-8 bg-cyan-950/20 border border-cyan-500/30 rounded-2xl p-6 relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 p-4">
+              <button onClick={() => setAiAnalysis(null)} className="text-slate-500 hover:text-white transition-colors">×</button>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-cyan-500/20 rounded-xl">
+                <Sparkles className="w-6 h-6 text-cyan-400 animate-pulse" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xs font-black text-cyan-400 uppercase tracking-widest mb-2">AI Strategic Assessment</h3>
+                <p className="text-sm text-slate-200 leading-relaxed font-mono italic">
+                  &quot;{aiAnalysis}&quot;
+                </p>
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
         {/* Left Sidebar: Threat Intel */}

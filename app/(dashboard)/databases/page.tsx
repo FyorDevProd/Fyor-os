@@ -93,8 +93,8 @@ export default function DatabasesPage() {
   const handleDemoAction = (action: string) => {
     if (isDemo) {
       import('sonner').then(({ toast }) => {
-        toast.error('Access Denied', {
-          description: `Action "${action}" is disabled in Demo Mode.`
+        toast.success(`Simulation: ${action}`, {
+          description: `Action "${action}" was simulated in Demo Mode.`
         });
       });
       return true;

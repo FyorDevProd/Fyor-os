@@ -78,9 +78,10 @@ export default function AutonomousCorePage() {
 
   const toggleAutoPilot = () => {
     if (isDemo) {
-      toast.error('Access Denied', {
-        description: 'Autonomous Core settings are locked in Demo Mode.'
+      toast.success(`Simulation: Autonomous Core ${!isAutoPilot ? 'Enabled' : 'Disabled'}`, {
+        description: !isAutoPilot ? 'System is now in Auto-Pilot mode (Simulated).' : 'System returned to manual control (Simulated).'
       });
+      setIsAutoPilot(!isAutoPilot);
       return;
     }
     setIsAutoPilot(!isAutoPilot);

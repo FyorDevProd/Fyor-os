@@ -73,13 +73,12 @@ export default function JarvisVoicePage() {
   }, []);
 
   const startListening = () => {
-    if (isDemo) {
-      toast.error('Demo Mode', { description: 'Voice commands are restricted.' });
-      return;
-    }
     if (!recognitionRef.current) {
       toast.error('Browser abang nggak support voice recognition.');
       return;
+    }
+    if (isDemo) {
+      toast.info('Demo Mode', { description: 'Voice commands are simulated.' });
     }
     setTranscript('');
     setResponse('');
