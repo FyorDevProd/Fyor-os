@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { 
   Cpu, MemoryStick, HardDrive, Activity, Server, Globe, 
   Container, AlertTriangle, Terminal as TerminalIcon, 
   ShieldCheck, Zap, Stethoscope, Wand2, ArrowUpRight, 
-  CheckCircle2, Clock, Shield, ChevronRight
+  CheckCircle2, Clock, Shield, ChevronRight, Sparkles,
+  BrainCircuit, RefreshCw, Lightbulb, X
 } from 'lucide-react';
 import Link from 'next/link';
+import { generateAIResponse } from '@/lib/gemini';
+import { toast } from 'sonner';
 
 import { AdBanner } from '@/components/ad-banner';
 
@@ -69,6 +72,8 @@ export default function Dashboard() {
     disk: 0,
     network: { rx: 0, tx: 0 }
   });
+  const [aiAdvice, setAiAdvice] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     const socket = io(SOCKET_URL);
@@ -86,6 +91,27 @@ export default function Dashboard() {
       socket.disconnect();
     };
   }, []);
+
+  const getAiAdvice = async () => {
+    setIsAnalyzing(true);
+    try {
+      const prompt = `Analyze these server stats and provide 3 short, actionable performance or security tips:
+      CPU: ${currentStats.cpu.toFixed(1)}%
+      RAM: ${currentStats.ram.toFixed(1)}%
+      Disk: ${currentStats.disk.toFixed(1)}%
+      Network RX: ${(currentStats.network.rx / 1024).toFixed(2)} KB/s
+      Network TX: ${(currentStats.network.tx / 1024).toFixed(2)} KB/s
+      
+      Format as a concise bulleted list.`;
+      
+      const advice = await generateAIResponse(prompt, "You are an AI Server Performance Advisor. Be concise and technical.");
+      setAiAdvice(advice);
+    } catch (error) {
+      toast.error("Failed to get AI advice");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   // Calculate Health Score (Gamification)
   const healthScore = Math.max(0, Math.round(100 - ((currentStats.cpu * 0.4) + (currentStats.ram * 0.4) + (currentStats.disk * 0.2))));
@@ -107,39 +133,83 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Gamified Health Score */}
-        <div className={`flex items-center gap-4 p-3 sm:p-4 rounded-2xl border backdrop-blur-md ${healthBg} transition-colors`}>
-          <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-              <path
-                className="text-black/20"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-              />
-              <path
-                className={healthColor}
-                strokeDasharray={`${healthScore}, 100`}
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className={`text-sm sm:text-lg font-black font-mono ${healthColor}`}>{healthScore}</span>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={getAiAdvice}
+            disabled={isAnalyzing}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-white/10 rounded-xl text-xs font-bold font-mono text-white hover:border-white/20 transition-all group"
+          >
+            {isAnalyzing ? <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" /> : <BrainCircuit className="w-4 h-4 text-fuchsia-400 group-hover:scale-110 transition-transform" />}
+            AI ADVISOR
+          </button>
+
+          {/* Gamified Health Score */}
+          <div className={`flex items-center gap-4 p-3 sm:p-4 rounded-2xl border backdrop-blur-md ${healthBg} transition-colors`}>
+            <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path
+                  className="text-black/20"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                />
+                <path
+                  className={healthColor}
+                  strokeDasharray={`${healthScore}, 100`}
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className={`text-sm sm:text-lg font-black font-mono ${healthColor}`}>{healthScore}</span>
+              </div>
             </div>
-          </div>
-          <div>
-            <p className="text-[10px] sm:text-xs font-mono text-slate-400 uppercase tracking-widest">Server Health</p>
-            <p className={`text-sm sm:text-base font-bold ${healthColor}`}>
-              {healthScore > 80 ? 'Excellent' : healthScore > 50 ? 'Needs Attention' : 'Critical'}
-            </p>
+            <div>
+              <p className="text-[10px] sm:text-xs font-mono text-slate-400 uppercase tracking-widest">Server Health</p>
+              <p className={`text-sm sm:text-base font-bold ${healthColor}`}>
+                {healthScore > 80 ? 'Excellent' : healthScore > 50 ? 'Needs Attention' : 'Critical'}
+              </p>
+            </div>
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {aiAdvice && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-gradient-to-r from-cyan-500/10 to-fuchsia-500/10 border border-cyan-500/20 rounded-3xl p-6 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-4">
+              <button onClick={() => setAiAdvice(null)} className="text-slate-500 hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-cyan-500/20 rounded-2xl border border-cyan-500/30">
+                <Sparkles className="w-6 h-6 text-cyan-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  AI Performance Insights
+                  <span className="text-[10px] font-mono bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-500/30">GEN AI</span>
+                </h3>
+                <div className="mt-3 text-slate-300 text-sm leading-relaxed prose prose-invert prose-sm max-w-none">
+                  {aiAdvice.split('\n').map((line, i) => (
+                    <p key={i} className="mb-1">{line}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bento Grid: Core Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
@@ -237,11 +307,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Third Row: Processes & Events */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      {/* Third Row: Processes & Events & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         
         {/* Top Processes (Technical Data Grid Style) */}
-        <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-3xl p-5 sm:p-6 flex flex-col">
+        <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-3xl p-5 sm:p-6 flex flex-col lg:col-span-1">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h3 className="text-sm sm:text-base font-bold text-white font-mono uppercase tracking-widest">Top Processes</h3>
             <Link href="/processes" className="text-[10px] sm:text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1 uppercase tracking-widest">
@@ -249,7 +319,7 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="flex-1 overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[300px]">
+            <table className="w-full text-left border-collapse min-w-[250px]">
               <thead>
                 <tr className="border-b border-white/10">
                   <th className="pb-3 text-[10px] font-mono text-slate-500 uppercase tracking-widest">Process</th>
@@ -275,8 +345,36 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Quick Actions */}
+        <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-3xl p-5 sm:p-6 flex flex-col lg:col-span-1">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h3 className="text-sm sm:text-base font-bold text-white font-mono uppercase tracking-widest flex items-center gap-2">
+              <Zap className="w-4 h-4 text-amber-400" />
+              Quick Actions
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3 flex-1">
+            <button className="flex flex-col items-center justify-center p-4 bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-500/50 rounded-2xl transition-all group">
+              <Server className="w-6 h-6 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-mono text-slate-300 uppercase tracking-widest text-center">Restart Nginx</span>
+            </button>
+            <button className="flex flex-col items-center justify-center p-4 bg-white/5 hover:bg-fuchsia-500/20 border border-white/10 hover:border-fuchsia-500/50 rounded-2xl transition-all group">
+              <HardDrive className="w-6 h-6 text-fuchsia-400 mb-2 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-mono text-slate-300 uppercase tracking-widest text-center">Clear Cache</span>
+            </button>
+            <button className="flex flex-col items-center justify-center p-4 bg-white/5 hover:bg-emerald-500/20 border border-white/10 hover:border-emerald-500/50 rounded-2xl transition-all group">
+              <ShieldCheck className="w-6 h-6 text-emerald-400 mb-2 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-mono text-slate-300 uppercase tracking-widest text-center">Update System</span>
+            </button>
+            <button className="flex flex-col items-center justify-center p-4 bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/50 rounded-2xl transition-all group">
+              <AlertTriangle className="w-6 h-6 text-rose-400 mb-2 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-mono text-slate-300 uppercase tracking-widest text-center">Reboot Server</span>
+            </button>
+          </div>
+        </div>
+
         {/* Recent Events (Timeline Style) */}
-        <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-3xl p-5 sm:p-6 flex flex-col">
+        <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-3xl p-5 sm:p-6 flex flex-col lg:col-span-1">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h3 className="text-sm sm:text-base font-bold text-white font-mono uppercase tracking-widest flex items-center gap-2">
               <Clock className="w-4 h-4 text-slate-400" />

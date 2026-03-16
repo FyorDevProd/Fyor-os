@@ -137,19 +137,24 @@ export default function LandingPage() {
         {/* Hero Section - Split Layout */}
         <section className="relative pt-32 pb-32 px-6 overflow-hidden min-h-[90vh] flex items-center">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 dark:opacity-40 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/30 to-transparent blur-3xl rounded-full" />
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/30 to-transparent blur-3xl rounded-full animate-pulse" />
           </div>
           
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10 w-full">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               className="text-center lg:text-left"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold tracking-wide uppercase mb-6 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                <Zap className="w-3 h-3" /> v2.0 is now live
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold tracking-wide uppercase mb-6 shadow-[0_0_15px_rgba(59,130,246,0.2)]"
+              >
+                <Zap className="w-3 h-3 animate-bounce" /> v2.0 is now live
+              </motion.div>
               <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]">
                 Server management, <br className="hidden lg:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300">simplified.</span>
@@ -158,16 +163,20 @@ export default function LandingPage() {
                 FYOR OS is a free, open-source web hosting control panel. Deploy websites, manage databases, and monitor your VPS through a beautiful, intuitive interface.
               </p>
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                <button 
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleGetStarted}
-                  className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 hover:scale-105"
+                  className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2"
                 >
                   {isDemoMode ? <PlayCircle className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
                   {isDemoMode ? 'Try Live Demo' : 'Install FYOR OS'}
-                </button>
-                <Link href="#docs" className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 hover:scale-105">
-                  <Terminal className="w-5 h-5 text-slate-400" /> View Docs
-                </Link>
+                </motion.button>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
+                  <Link href="#docs" className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                    <Terminal className="w-5 h-5 text-slate-400" /> View Docs
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
 

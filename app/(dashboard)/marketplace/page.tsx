@@ -41,64 +41,58 @@ interface App {
 }
 
 const apps: App[] = [
+  // --- WEB SERVERS ---
   {
-    id: 'wordpress',
-    name: 'WordPress',
-    description: 'The world\'s most popular website builder and CMS.',
-    category: 'CMS',
+    id: 'nginx',
+    name: 'Nginx',
+    description: 'High performance web server and reverse proxy.',
+    category: 'Web',
     icon: Globe,
-    image: 'https://picsum.photos/seed/wordpress/400/200',
-    stars: 4.8,
-    downloads: '10M+',
-    version: '6.4.3'
-  },
-  {
-    id: 'ghost',
-    name: 'Ghost',
-    description: 'Professional publishing platform for modern creators.',
-    category: 'CMS',
-    icon: Zap,
-    image: 'https://picsum.photos/seed/ghost/400/200',
-    stars: 4.7,
-    downloads: '500K+',
-    version: '5.80.0'
-  },
-  {
-    id: 'nextcloud',
-    name: 'Nextcloud',
-    description: 'The self-hosted productivity platform that keeps you in control.',
-    category: 'Tool',
-    icon: Shield,
-    image: 'https://picsum.photos/seed/nextcloud/400/200',
+    image: 'https://picsum.photos/seed/nginx/400/200',
     stars: 4.9,
-    downloads: '2M+',
-    version: '28.0.2'
+    downloads: '20M+',
+    version: '1.24.0'
   },
   {
-    id: 'meilisearch',
-    name: 'Meilisearch',
-    description: 'Lightning-fast, ultra-relevant search engine for your apps.',
-    category: 'Tool',
-    icon: Search,
-    image: 'https://picsum.photos/seed/meili/400/200',
-    stars: 4.8,
-    downloads: '1M+',
-    version: '1.6.2'
-  },
-  {
-    id: 'mongodb',
-    name: 'MongoDB',
-    description: 'The most popular document-based NoSQL database.',
-    category: 'Database',
-    icon: Database,
-    image: 'https://picsum.photos/seed/mongo/400/200',
+    id: 'apache',
+    name: 'Apache',
+    description: 'The world\'s most used web server software.',
+    category: 'Web',
+    icon: Globe,
+    image: 'https://picsum.photos/seed/apache/400/200',
     stars: 4.7,
-    downloads: '5M+',
-    version: '7.0.5'
+    downloads: '15M+',
+    version: '2.4.58'
   },
   {
-    id: 'mysql',
-    name: 'MySQL',
+    id: 'openlitespeed',
+    name: 'OpenLiteSpeed',
+    description: 'High-performance, lightweight, open source HTTP server.',
+    category: 'Web',
+    icon: Zap,
+    image: 'https://picsum.photos/seed/ols/400/200',
+    stars: 4.8,
+    downloads: '5M+',
+    version: '1.7.18'
+  },
+  {
+    id: 'nginx-pro',
+    name: 'Nginx Pro',
+    description: 'Advanced Nginx with built-in WAF, load balancing, and caching optimization.',
+    category: 'Web',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/nginxpro/400/200',
+    stars: 5.0,
+    downloads: '500K+',
+    version: '1.24.0-pro',
+    price: 9.99,
+    isPro: true
+  },
+
+  // --- DATABASES ---
+  {
+    id: 'mysql-8',
+    name: 'MySQL 8.0',
     description: 'The world\'s most popular open-source relational database.',
     category: 'Database',
     icon: Database,
@@ -106,6 +100,28 @@ const apps: App[] = [
     stars: 4.8,
     downloads: '15M+',
     version: '8.0.36'
+  },
+  {
+    id: 'mysql-57',
+    name: 'MySQL 5.7',
+    description: 'Legacy stable version of MySQL relational database.',
+    category: 'Database',
+    icon: Database,
+    image: 'https://picsum.photos/seed/mysql57/400/200',
+    stars: 4.7,
+    downloads: '10M+',
+    version: '5.7.44'
+  },
+  {
+    id: 'mariadb',
+    name: 'MariaDB',
+    description: 'Enhanced, drop-in replacement for MySQL.',
+    category: 'Database',
+    icon: Database,
+    image: 'https://picsum.photos/seed/mariadb/400/200',
+    stars: 4.8,
+    downloads: '8M+',
+    version: '10.11.6'
   },
   {
     id: 'postgresql',
@@ -130,125 +146,369 @@ const apps: App[] = [
     version: '7.2.4'
   },
   {
-    id: 'strapi',
-    name: 'Strapi',
-    description: 'The leading open-source headless CMS. 100% JavaScript.',
-    category: 'CMS',
-    icon: LayoutGrid,
-    image: 'https://picsum.photos/seed/strapi/400/200',
+    id: 'memcached',
+    name: 'Memcached',
+    description: 'Free & open source, high-performance, distributed memory object caching system.',
+    category: 'Database',
+    icon: Zap,
+    image: 'https://picsum.photos/seed/memcached/400/200',
     stars: 4.6,
-    downloads: '800K+',
-    version: '4.20.1'
+    downloads: '4M+',
+    version: '1.6.22'
   },
   {
-    id: 'directus',
-    name: 'Directus',
-    description: 'Open-source data platform that turns any SQL database into an API.',
-    category: 'CMS',
-    icon: LayoutGrid,
-    image: 'https://picsum.photos/seed/directus/400/200',
-    stars: 4.8,
-    downloads: '400K+',
-    version: '10.10.0'
-  },
-  {
-    id: 'uptime-kuma',
-    name: 'Uptime Kuma',
-    description: 'A self-hosted monitoring tool like "Uptime Robot".',
-    category: 'Tool',
-    icon: Activity,
-    image: 'https://picsum.photos/seed/kuma/400/200',
-    stars: 4.9,
-    downloads: '300K+',
-    version: '1.23.11'
-  },
-  {
-    id: 'portainer',
-    name: 'Portainer',
-    description: 'Making Docker and Kubernetes management easy.',
-    category: 'Tool',
-    icon: Rocket,
-    image: 'https://picsum.photos/seed/portainer/400/200',
-    stars: 4.8,
-    downloads: '5M+',
-    version: '2.19.4'
-  },
-  {
-    id: 'gitea',
-    name: 'Gitea',
-    description: 'A painless self-hosted Git service. Lightweight and fast.',
-    category: 'Tool',
-    icon: Github,
-    image: 'https://picsum.photos/seed/gitea/400/200',
-    stars: 4.7,
-    downloads: '1M+',
-    version: '1.21.7'
-  },
-  {
-    id: 'minio',
-    name: 'MinIO',
-    description: 'High Performance, Kubernetes Native Object Storage.',
-    category: 'Tool',
-    icon: Shield,
-    image: 'https://picsum.photos/seed/minio/400/200',
-    stars: 4.8,
-    downloads: '3M+',
-    version: '2024.2.24'
-  },
-  {
-    id: 'grafana',
-    name: 'Grafana',
-    description: 'The open observability platform for every stack.',
-    category: 'Tool',
-    icon: Activity,
-    image: 'https://picsum.photos/seed/grafana/400/200',
-    stars: 4.9,
-    downloads: '10M+',
-    version: '10.3.3'
-  },
-  {
-    id: 'pocketbase',
-    name: 'PocketBase',
-    description: 'Open source backend in 1 file with realtime database and auth.',
+    id: 'mongodb',
+    name: 'MongoDB',
+    description: 'The most popular document-based NoSQL database.',
     category: 'Database',
     icon: Database,
-    image: 'https://picsum.photos/seed/pocketbase/400/200',
+    image: 'https://picsum.photos/seed/mongo/400/200',
+    stars: 4.7,
+    downloads: '5M+',
+    version: '7.0.5'
+  },
+
+  // --- PHP VERSIONS ---
+  {
+    id: 'php-83',
+    name: 'PHP 8.3',
+    description: 'Latest stable PHP version with typed class constants and new random extension.',
+    category: 'Tool',
+    icon: LayoutGrid,
+    image: 'https://picsum.photos/seed/php83/400/200',
     stars: 4.9,
-    downloads: '200K+',
-    version: '0.21.1'
+    downloads: '2M+',
+    version: '8.3.3'
   },
   {
-    id: 'umami',
-    name: 'Umami',
-    description: 'Umami is a simple, fast, privacy-focused alternative to Google Analytics.',
+    id: 'php-82',
+    name: 'PHP 8.2',
+    description: 'Stable PHP environment for modern web applications.',
+    category: 'Tool',
+    icon: LayoutGrid,
+    image: 'https://picsum.photos/seed/php82/400/200',
+    stars: 4.8,
+    downloads: '5M+',
+    version: '8.2.16'
+  },
+  {
+    id: 'php-81',
+    name: 'PHP 8.1',
+    description: 'PHP environment with enums, readonly properties, and fibers.',
+    category: 'Tool',
+    icon: LayoutGrid,
+    image: 'https://picsum.photos/seed/php81/400/200',
+    stars: 4.7,
+    downloads: '6M+',
+    version: '8.1.27'
+  },
+  {
+    id: 'php-74',
+    name: 'PHP 7.4',
+    description: 'Legacy PHP environment (End of Life - use only if necessary).',
+    category: 'Tool',
+    icon: LayoutGrid,
+    image: 'https://picsum.photos/seed/php74/400/200',
+    stars: 4.5,
+    downloads: '10M+',
+    version: '7.4.33'
+  },
+
+  // --- TOOLS & MANAGERS ---
+  {
+    id: 'phpmyadmin',
+    name: 'phpMyAdmin',
+    description: 'Free software tool written in PHP, intended to handle the administration of MySQL.',
+    category: 'Tool',
+    icon: Database,
+    image: 'https://picsum.photos/seed/pma/400/200',
+    stars: 4.8,
+    downloads: '15M+',
+    version: '5.2.1'
+  },
+  {
+    id: 'docker-manager',
+    name: 'Docker Manager',
+    description: 'Manage Docker containers, images, networks, and volumes from the UI.',
+    category: 'Tool',
+    icon: Rocket,
+    image: 'https://picsum.photos/seed/docker/400/200',
+    stars: 4.9,
+    downloads: '8M+',
+    version: '2.0.1'
+  },
+  {
+    id: 'pm2-manager',
+    name: 'PM2 Manager',
+    description: 'Advanced process manager for Node.js applications.',
     category: 'Tool',
     icon: Activity,
-    image: 'https://picsum.photos/seed/umami/400/200',
+    image: 'https://picsum.photos/seed/pm2/400/200',
+    stars: 4.8,
+    downloads: '4M+',
+    version: '5.3.1'
+  },
+  {
+    id: 'python-manager',
+    name: 'Python Manager',
+    description: 'Manage Python virtual environments and WSGI/ASGI applications.',
+    category: 'Tool',
+    icon: LayoutGrid,
+    image: 'https://picsum.photos/seed/python/400/200',
+    stars: 4.7,
+    downloads: '2M+',
+    version: '2.1.0'
+  },
+  {
+    id: 'pure-ftpd',
+    name: 'Pure-Ftpd',
+    description: 'Free, secure, production-quality and standard-conformant FTP server.',
+    category: 'Tool',
+    icon: Download,
+    image: 'https://picsum.photos/seed/ftp/400/200',
+    stars: 4.6,
+    downloads: '5M+',
+    version: '1.0.51'
+  },
+  {
+    id: 'bind-dns',
+    name: 'DNS Server (Bind)',
+    description: 'Manage your own DNS zones and records directly from the panel.',
+    category: 'Tool',
+    icon: Globe,
+    image: 'https://picsum.photos/seed/dns/400/200',
+    stars: 4.5,
+    downloads: '1M+',
+    version: '9.18.24'
+  },
+  {
+    id: 'mail-server-pro',
+    name: 'Mail Server Pro',
+    description: 'Complete enterprise mail server solution with Anti-Spam and Anti-Virus.',
+    category: 'Tool',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/mail/400/200',
+    stars: 4.9,
+    downloads: '500K+',
+    version: '3.0.0',
+    price: 15.99,
+    isPro: true
+  },
+
+  // --- SECURITY ---
+  {
+    id: 'fail2ban',
+    name: 'Fail2ban',
+    description: 'Ban IPs that show malicious signs -- too many password failures, etc.',
+    category: 'Security',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/fail2ban/400/200',
+    stars: 4.9,
+    downloads: '10M+',
+    version: '1.0.2'
+  },
+  {
+    id: 'sys-firewall',
+    name: 'System Firewall',
+    description: 'Manage UFW/Firewalld rules easily through the visual interface.',
+    category: 'Security',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/firewall/400/200',
+    stars: 4.8,
+    downloads: '12M+',
+    version: '1.5.0'
+  },
+  {
+    id: 'nginx-waf',
+    name: 'Nginx WAF Pro',
+    description: 'Web Application Firewall for Nginx. Protects against SQLi, XSS, and more.',
+    category: 'Security',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/nginxwaf/400/200',
+    stars: 5.0,
+    downloads: '200K+',
+    version: '2.1.0',
+    price: 19.99,
+    isPro: true
+  },
+  {
+    id: 'apache-waf',
+    name: 'Apache WAF Pro',
+    description: 'Web Application Firewall for Apache based on ModSecurity.',
+    category: 'Security',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/apachewaf/400/200',
     stars: 4.8,
     downloads: '150K+',
-    version: '2.10.2'
+    version: '2.0.5',
+    price: 19.99,
+    isPro: true
   },
   {
-    id: 'react-starter',
-    name: 'React Starter',
-    description: 'Clean React template with Tailwind CSS and Vite.',
-    category: 'Web',
-    icon: Rocket,
-    image: 'https://picsum.photos/seed/react/400/200',
-    stars: 4.5,
-    downloads: '50K+',
-    version: '1.0.0'
-  },
-  {
-    id: 'nextjs-starter',
-    name: 'Next.js Starter',
-    description: 'Production-ready Next.js template with App Router.',
-    category: 'Web',
-    icon: Globe,
-    image: 'https://picsum.photos/seed/nextjs/400/200',
+    id: 'anti-intrusion',
+    name: 'Anti-Intrusion Pro',
+    description: 'Real-time file tampering detection and malware scanning.',
+    category: 'Security',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/antiintrusion/400/200',
     stars: 4.9,
     downloads: '100K+',
-    version: '14.1.0'
+    version: '3.0.1',
+    price: 24.99,
+    isPro: true
+  },
+
+  // --- PLUGINS & BACKUPS ---
+  {
+    id: 'ftp-backup',
+    name: 'FTP Storage',
+    description: 'Backup your websites and databases to a remote FTP server.',
+    category: 'Plugin',
+    icon: Download,
+    image: 'https://picsum.photos/seed/ftpbackup/400/200',
+    stars: 4.7,
+    downloads: '3M+',
+    version: '1.2.0'
+  },
+  {
+    id: 'gdrive-backup',
+    name: 'Google Drive Backup',
+    description: 'Automated backups directly to your Google Drive account.',
+    category: 'Plugin',
+    icon: Database,
+    image: 'https://picsum.photos/seed/gdrive/400/200',
+    stars: 4.9,
+    downloads: '1M+',
+    version: '2.0.0',
+    price: 4.99,
+    isPro: true
+  },
+  {
+    id: 's3-backup',
+    name: 'AWS S3 Backup',
+    description: 'Enterprise-grade automated backups to Amazon S3 or compatible storage.',
+    category: 'Plugin',
+    icon: Database,
+    image: 'https://picsum.photos/seed/s3/400/200',
+    stars: 4.8,
+    downloads: '500K+',
+    version: '1.5.0',
+    price: 9.99,
+    isPro: true
+  },
+  {
+    id: 'website-speed',
+    name: 'Website Speed Pro',
+    description: 'One-click optimization for static assets, image compression, and caching.',
+    category: 'Plugin',
+    icon: Zap,
+    image: 'https://picsum.photos/seed/speed/400/200',
+    stars: 4.9,
+    downloads: '300K+',
+    version: '2.2.0',
+    price: 14.99,
+    isPro: true
+  },
+
+  // --- CMS & ONE-CLICK APPS ---
+  {
+    id: 'wordpress',
+    name: 'WordPress',
+    description: 'One-click deployment for the world\'s most popular CMS.',
+    category: 'CMS',
+    icon: Globe,
+    image: 'https://picsum.photos/seed/wordpress/400/200',
+    stars: 4.9,
+    downloads: '50M+',
+    version: '6.4.3'
+  },
+  {
+    id: 'zblog',
+    name: 'Z-BlogPHP',
+    description: 'A fast, reliable and powerful blog publishing application.',
+    category: 'CMS',
+    icon: LayoutGrid,
+    image: 'https://picsum.photos/seed/zblog/400/200',
+    stars: 4.6,
+    downloads: '2M+',
+    version: '1.7.3'
+  },
+  {
+    id: 'joomla',
+    name: 'Joomla!',
+    description: 'Award-winning CMS to build websites and powerful online applications.',
+    category: 'CMS',
+    icon: Globe,
+    image: 'https://picsum.photos/seed/joomla/400/200',
+    stars: 4.5,
+    downloads: '5M+',
+    version: '5.0.3'
+  },
+  {
+    id: 'drupal',
+    name: 'Drupal',
+    description: 'Open source CMS for ambitious digital experiences.',
+    category: 'CMS',
+    icon: Globe,
+    image: 'https://picsum.photos/seed/drupal/400/200',
+    stars: 4.6,
+    downloads: '3M+',
+    version: '10.2.3'
+  },
+  {
+    id: 'ghost',
+    name: 'Ghost',
+    description: 'Professional publishing platform for modern creators.',
+    category: 'CMS',
+    icon: Zap,
+    image: 'https://picsum.photos/seed/ghost/400/200',
+    stars: 4.8,
+    downloads: '1M+',
+    version: '5.80.0'
+  },
+  {
+    id: 'nextcloud',
+    name: 'Nextcloud',
+    description: 'The self-hosted productivity platform that keeps you in control.',
+    category: 'Tool',
+    icon: Shield,
+    image: 'https://picsum.photos/seed/nextcloud/400/200',
+    stars: 4.9,
+    downloads: '4M+',
+    version: '28.0.2'
+  },
+  {
+    id: 'opencart',
+    name: 'OpenCart',
+    description: 'Free open source ecommerce platform for online merchants.',
+    category: 'CMS',
+    icon: ShoppingBag,
+    image: 'https://picsum.photos/seed/opencart/400/200',
+    stars: 4.7,
+    downloads: '2M+',
+    version: '3.0.3.9'
+  },
+  {
+    id: 'moodle',
+    name: 'Moodle',
+    description: 'The world\'s most popular learning management system (LMS).',
+    category: 'CMS',
+    icon: Globe,
+    image: 'https://picsum.photos/seed/moodle/400/200',
+    stars: 4.8,
+    downloads: '3M+',
+    version: '4.3.3'
+  },
+  {
+    id: 'laravel',
+    name: 'Laravel Starter',
+    description: 'The PHP Framework for Web Artisans. One-click ready environment.',
+    category: 'Web',
+    icon: Rocket,
+    image: 'https://picsum.photos/seed/laravel/400/200',
+    stars: 4.9,
+    downloads: '10M+',
+    version: '11.0.0'
   },
   {
     id: 'ollama',
@@ -260,94 +520,6 @@ const apps: App[] = [
     stars: 4.9,
     downloads: '2M+',
     version: '0.1.30',
-    isPro: true
-  },
-  {
-    id: 'n8n',
-    name: 'n8n',
-    description: 'Fair-code licensed workflow automation tool. Easily automate tasks across different services.',
-    category: 'AI & ML',
-    icon: Activity,
-    image: 'https://picsum.photos/seed/n8n/400/200',
-    stars: 4.8,
-    downloads: '1M+',
-    version: '1.33.1',
-    isPro: true
-  },
-  {
-    id: 'chromadb',
-    name: 'ChromaDB',
-    description: 'The AI-native open-source embedding database. Fast, simple, and scalable.',
-    category: 'AI & ML',
-    icon: Database,
-    image: 'https://picsum.photos/seed/chroma/400/200',
-    stars: 4.7,
-    downloads: '500K+',
-    version: '0.4.24',
-    isPro: true
-  },
-  {
-    id: 'huggingface-tgi',
-    name: 'HF Text Generation',
-    description: 'Toolkit for deploying and serving Large Language Models (LLMs) efficiently.',
-    category: 'AI & ML',
-    icon: Rocket,
-    image: 'https://picsum.photos/seed/hftgi/400/200',
-    stars: 4.8,
-    downloads: '100K+',
-    version: '1.4.0',
-    isPro: true
-  },
-  {
-    id: 'fyor-firewall-pro',
-    name: 'Fyor Firewall Pro',
-    description: 'Enterprise-grade WAF and DDoS protection for your server.',
-    category: 'Security',
-    icon: Shield,
-    image: 'https://picsum.photos/seed/firewall/400/200',
-    stars: 5.0,
-    downloads: '1K+',
-    version: '2.4.0',
-    price: 49,
-    isPro: true
-  },
-  {
-    id: 'ai-log-doctor-pro',
-    name: 'AI Log Doctor Pro',
-    description: 'Advanced AI analysis for system logs with auto-fix suggestions.',
-    category: 'Plugin',
-    icon: Zap,
-    image: 'https://picsum.photos/seed/aidoctor/400/200',
-    stars: 4.9,
-    downloads: '5K+',
-    version: '1.2.0',
-    price: 19,
-    isPro: true
-  },
-  {
-    id: 'cloud-sync-pro',
-    name: 'Cloud Sync Pro',
-    description: 'Real-time multi-cloud backup synchronization (S3, Drive, Dropbox).',
-    category: 'Tool',
-    icon: Rocket,
-    image: 'https://picsum.photos/seed/cloudsync/400/200',
-    stars: 4.8,
-    downloads: '2K+',
-    version: '3.1.5',
-    price: 29,
-    isPro: true
-  },
-  {
-    id: 'seo-optimizer-plugin',
-    name: 'SEO Optimizer Plugin',
-    description: 'Automatically optimize your website meta tags, sitemaps, and images for search engines.',
-    category: 'Plugin',
-    icon: Globe,
-    image: 'https://picsum.photos/seed/seo/400/200',
-    stars: 4.7,
-    downloads: '3K+',
-    version: '1.0.5',
-    price: 15,
     isPro: true
   }
 ];
@@ -396,16 +568,25 @@ export default function MarketplacePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ appId: app.id, appName: app.name })
-      }).then(res => res.json()),
+      }).then(async res => {
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.error || 'Deployment failed');
+        }
+        return data;
+      }),
       {
         loading: `Deploying ${app.name} to your server...`,
         success: (data) => {
           setDeployingId(null);
+          if (data.deployDir) {
+            return `${app.name} deployed to ${data.deployDir}!`;
+          }
           return `${app.name} deployed! Container ID: ${data.containerId}`;
         },
         error: (err) => {
           setDeployingId(null);
-          return 'Deployment failed. Please check logs.';
+          return err.message || 'Deployment failed. Please check logs.';
         }
       }
     );

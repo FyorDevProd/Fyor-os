@@ -27,7 +27,7 @@ try {
 }
 
 # 3. Setup Direktori
-$installDir = "C:\www\wwwroot\fyoros"
+$installDir = "C:\www\server\fyoros"
 Write-Host "⏳ Setting up FYOR OS directory at $installDir..." -ForegroundColor Yellow
 
 if (Test-Path $installDir) {

@@ -59,7 +59,7 @@ export default function WarRoomPage() {
         model: "gemini-3-flash-preview",
         contents: `Analyze these current server attack vectors and provide a brief strategic assessment (max 100 words): ${JSON.stringify(attacks)}`,
       });
-      setAiAnalysis(response.text);
+      setAiAnalysis(response.text || 'No analysis available.');
     } catch (err) {
       console.error('AI Analysis failed:', err);
       toast.error('AI Intel Error', { description: 'Failed to analyze global threats.' });
@@ -126,9 +126,9 @@ export default function WarRoomPage() {
 
       // Draw globe background
       svg.append("path")
-        .datum({ type: "Sphere" })
+        .datum({ type: "Sphere" } as any)
         .attr("class", "sphere")
-        .attr("d", path)
+        .attr("d", path as any)
         .attr("fill", "#050505")
         .attr("stroke", "#1e293b")
         .attr("stroke-width", "1");
@@ -138,7 +138,7 @@ export default function WarRoomPage() {
         .data((countries as any).features)
         .enter().append("path")
         .attr("class", "country")
-        .attr("d", path)
+        .attr("d", path as any)
         .attr("fill", "#0f172a")
         .attr("stroke", "#334155")
         .attr("stroke-width", "0.5");

@@ -27,7 +27,9 @@ import {
   Ghost,
   Mic,
   Stethoscope,
-  Wand2
+  Wand2,
+  Clock,
+  HardDrive
 } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { useLanguage } from './language-provider';
@@ -52,7 +54,10 @@ const navGroups = [
     items: [
       { nameKey: 'nav.servers', href: '/servers', icon: Server },
       { nameKey: 'nav.websites', href: '/websites', icon: Globe },
+      { nameKey: 'nav.domains', href: '/domains', icon: Globe },
       { nameKey: 'nav.databases', href: '/databases', icon: Database },
+      { nameKey: 'nav.ftp', href: '/ftp', icon: HardDrive },
+      { nameKey: 'nav.files', href: '/files', icon: FolderOpen },
       { nameKey: 'nav.docker', href: '/docker', icon: Container },
       { nameKey: 'nav.marketplace', href: '/marketplace', icon: ShoppingBag },
     ]
@@ -61,6 +66,7 @@ const navGroups = [
     titleKey: 'group.system',
     items: [
       { nameKey: 'nav.terminal', href: '/terminal', icon: Terminal },
+      { nameKey: 'nav.cron', href: '/cron', icon: Clock },
       { nameKey: 'nav.processes', href: '/processes', icon: Activity },
       { nameKey: 'nav.services', href: '/services', icon: ListChecks },
       { nameKey: 'nav.network', href: '/network', icon: Globe },

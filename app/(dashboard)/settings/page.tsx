@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
-import { Settings, Key, Github, Shield, Save, User, Database } from 'lucide-react';
+import { Settings, Key, Github, Shield, Save, User, Database, Globe, Lock, Server } from 'lucide-react';
 import { useAuth } from '@/components/auth-provider';
 import { toast } from 'sonner';
 
@@ -39,7 +39,7 @@ export default function SettingsPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-64 shrink-0 space-y-2">
           {[
-            { id: 'general', name: 'General', icon: Settings },
+            { id: 'general', name: 'Panel Settings', icon: Settings },
             { id: 'account', name: 'Account', icon: User },
             { id: 'security', name: 'Security', icon: Shield },
             { id: 'api', name: 'API Keys', icon: Key },
@@ -64,24 +64,76 @@ export default function SettingsPage() {
         <div className="flex-1 bg-black/40 backdrop-blur-md border border-cyan-500/20 rounded-2xl p-8">
           {activeTab === 'general' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              <h3 className="text-xl font-bold text-white font-mono uppercase tracking-widest border-b border-cyan-500/20 pb-4">General Settings</h3>
+              <h3 className="text-xl font-bold text-white font-mono uppercase tracking-widest border-b border-cyan-500/20 pb-4">Panel Settings</h3>
               
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Panel Name</label>
-                  <input type="text" defaultValue="FYOR AI SERVER OS" className="w-full max-w-md bg-black/50 border border-cyan-500/30 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 font-mono" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Panel Name</label>
+                    <input type="text" defaultValue="FYOR AI SERVER OS" className="w-full bg-black/50 border border-cyan-500/30 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 font-mono" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Panel Port</label>
+                    <div className="flex gap-2">
+                      <input type="text" defaultValue="3000" className="w-full bg-black/50 border border-cyan-500/30 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 font-mono" />
+                      <button onClick={() => handleDemoAction('Change Port')} className="px-4 py-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-cyan-500/30 transition-colors">Apply</button>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1">Default: 3000. Ensure the new port is open in your firewall.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Bind IP</label>
+                    <input type="text" placeholder="0.0.0.0" className="w-full bg-black/50 border border-cyan-500/30 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 font-mono" />
+                    <p className="text-[10px] text-slate-500 mt-1">Leave blank or 0.0.0.0 to listen on all IPs.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Timezone</label>
+                    <select className="w-full bg-black/50 border border-cyan-500/30 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
+                      <option>UTC</option>
+                      <option>America/New_York</option>
+                      <option>Europe/London</option>
+                      <option>Asia/Jakarta</option>
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Timezone</label>
-                  <select className="w-full max-w-md bg-black/50 border border-cyan-500/30 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 font-mono">
-                    <option>UTC</option>
-                    <option>America/New_York</option>
-                    <option>Europe/London</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-3 pt-4">
-                  <input type="checkbox" id="auto-update" defaultChecked className="w-4 h-4 rounded border-cyan-500/30 bg-black/50 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-black" />
-                  <label htmlFor="auto-update" className="text-sm text-slate-300">Enable automatic panel updates</label>
+
+                <div className="space-y-4">
+                  <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2"><Lock className="w-4 h-4 text-emerald-400" /> Panel SSL</h4>
+                        <p className="text-xs text-slate-400 mt-1">Enable HTTPS for the panel</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" onChange={() => handleDemoAction('Toggle Panel SSL')} />
+                        <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                      </label>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2"><Shield className="w-4 h-4 text-fuchsia-400" /> Basic Auth</h4>
+                        <p className="text-xs text-slate-400 mt-1">Extra password protection</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" onChange={() => handleDemoAction('Toggle Basic Auth')} />
+                        <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                      </label>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2"><Server className="w-4 h-4 text-cyan-400" /> Listen IPv6</h4>
+                        <p className="text-xs text-slate-400 mt-1">Enable IPv6 support</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" defaultChecked onChange={() => handleDemoAction('Toggle IPv6')} />
+                        <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <input type="checkbox" id="auto-update" defaultChecked className="w-4 h-4 rounded border-cyan-500/30 bg-black/50 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-black" />
+                    <label htmlFor="auto-update" className="text-sm text-slate-300">Enable automatic panel updates</label>
+                  </div>
                 </div>
               </div>
             </motion.div>

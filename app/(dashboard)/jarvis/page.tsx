@@ -171,20 +171,6 @@ export default function JarvisVoicePage() {
     }
   };
 
-  const speak = useCallback((text: string) => {
-    if (!synthRef.current) return;
-    
-    // Stop any current speech
-    synthRef.current.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'id-ID';
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    synthRef.current.speak(utterance);
-  }, []);
-
-
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-12">
       {/* Header */}

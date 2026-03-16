@@ -56,7 +56,7 @@ export default function ServicesPage() {
         model: "gemini-3-flash-preview",
         contents: `Analyze these service stats and predict potential health issues or resource bottlenecks: ${JSON.stringify(services)}. Provide a concise prediction.`,
       });
-      setAiPrediction(response.text);
+      setAiPrediction(response.text || 'No prediction available.');
       toast.success('AI Predictor: Analysis Complete');
     } catch (err) {
       console.error('AI Prediction failed:', err);

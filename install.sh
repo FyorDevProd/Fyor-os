@@ -73,7 +73,7 @@ echo -e "${YELLOW}⏳ [4/7] Installing PM2 (Process Manager)...${NC}"
 npm install -g pm2
 
 # 6. Setup Direktori dan Download Source Code
-INSTALL_DIR="/www/wwwroot/fyoros"
+INSTALL_DIR="/www/server/fyoros"
 echo -e "${YELLOW}⏳ [5/7] Setting up FYOR OS directory at ${INSTALL_DIR}...${NC}"
 
 if [ -d "$INSTALL_DIR" ]; then

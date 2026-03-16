@@ -49,6 +49,7 @@ export default function TerminalPage() {
   };
 
   const quickCommands = [
+    { name: 'FYOR Menu', cmd: 'fyor\n' },
     { name: 'System Info', cmd: 'uname -a\n' },
     { name: 'Disk Usage', cmd: 'df -h\n' },
     { name: 'Memory', cmd: 'free -m\n' },

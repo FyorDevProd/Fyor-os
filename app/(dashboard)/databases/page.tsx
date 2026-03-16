@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/components/auth-provider';
+import { toast } from 'sonner';
 import { 
   Database, 
   Plus, 
@@ -16,7 +17,9 @@ import {
   Trash2,
   Settings,
   TerminalSquare,
-  Server
+  Server,
+  X,
+  AlertTriangle
 } from 'lucide-react';
 
 const mockBackups = [
@@ -36,27 +39,75 @@ export default function DatabasesPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [dbToDelete, setDbToDelete] = useState<any>(null);
+  const [newDb, setNewDb] = useState({ name: '', type: 'MySQL', username: '', password: '' });
+
+  const fetchDatabases = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/databases');
+      const data = await res.json();
+      setDatabases(data);
+      if (!selectedDb && data.length > 0) {
+        setSelectedDb(data[0]);
+      }
+    } catch (e) {
+      console.error('Failed to fetch databases');
+      toast.error('Failed to load databases');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedDb]);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchDatabases = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch('/api/databases');
-        const data = await res.json();
-        if (isMounted) {
-          setDatabases(data);
-          setSelectedDb((prev: any) => prev || (data.length > 0 ? data[0] : null));
-        }
-      } catch (e) {
-        if (isMounted) console.error('Failed to fetch databases');
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
     fetchDatabases();
-    return () => { isMounted = false; };
-  }, []);
+  }, [fetchDatabases]);
+
+  const handleCreateDb = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDb.name || !newDb.username || !newDb.password) {
+      return toast.error('All fields are required');
+    }
+
+    try {
+      const res = await fetch('/api/databases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDb)
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Database created successfully');
+        setDatabases([...databases, data.database]);
+        setIsCreating(false);
+        setNewDb({ name: '', type: 'MySQL', username: '', password: '' });
+      } else {
+        toast.error(data.error || 'Failed to create database');
+      }
+    } catch (err) {
+      toast.error('Network error');
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!dbToDelete) return;
+    try {
+      const res = await fetch(`/api/databases/${dbToDelete.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Database deleted successfully');
+        setDatabases(databases.filter(d => d.id !== dbToDelete.id));
+        if (selectedDb?.id === dbToDelete.id) setSelectedDb(null);
+      } else {
+        toast.error(data.error || 'Failed to delete database');
+      }
+    } catch (err) {
+      toast.error('Network error');
+    } finally {
+      setDbToDelete(null);
+    }
+  };
 
   const handleAskAi = () => {
     if (!aiPrompt.trim()) return;
@@ -114,11 +165,14 @@ export default function DatabasesPage() {
           <p className="text-slate-400 font-mono text-sm mt-1">Manage, query, and backup your databases with AI.</p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-slate-300 font-mono text-sm hover:bg-white/10 transition-colors flex items-center gap-2">
-            <RefreshCw className="w-4 h-4" /> Refresh
+          <button 
+            onClick={fetchDatabases}
+            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-slate-300 font-mono text-sm hover:bg-white/10 transition-colors flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
           </button>
           <button 
-            onClick={() => handleDemoAction('New Database')}
+            onClick={() => setIsCreating(true)}
             className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/50 rounded-lg text-cyan-400 font-mono text-sm font-bold hover:bg-cyan-500/20 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all flex items-center gap-2"
           >
             <Plus className="w-4 h-4" /> New Database
@@ -229,7 +283,7 @@ export default function DatabasesPage() {
                         <button onClick={() => handleDemoAction('Backup Database')} className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded transition-colors" title="Backup">
                           <Download className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDemoAction('Delete Database')} className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors" title="Delete">
+                        <button onClick={() => setDbToDelete(db)} className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors" title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
@@ -443,6 +497,140 @@ export default function DatabasesPage() {
           </div>
         )}
       </motion.div>
+
+      {/* Create Database Modal */}
+      <AnimatePresence>
+        {isCreating && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsCreating(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#0a0a0a] border border-cyan-500/30 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-cyan-500/20 flex justify-between items-center bg-white/5">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <Database className="w-5 h-5 text-cyan-400" /> Add Database
+                </h2>
+                <button onClick={() => setIsCreating(false)} className="text-slate-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleCreateDb} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Database Type</label>
+                  <select 
+                    value={newDb.type}
+                    onChange={e => setNewDb({...newDb, type: e.target.value})}
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500"
+                  >
+                    <option value="MySQL">MySQL / MariaDB</option>
+                    <option value="PostgreSQL">PostgreSQL</option>
+                    <option value="MongoDB">MongoDB</option>
+                    <option value="Redis">Redis</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Database Name</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={newDb.name}
+                    onChange={e => setNewDb({...newDb, name: e.target.value})}
+                    placeholder="e.g., my_app_db" 
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Username</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={newDb.username}
+                    onChange={e => setNewDb({...newDb, username: e.target.value})}
+                    placeholder="e.g., db_user" 
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 uppercase mb-2">Password</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={newDb.password}
+                    onChange={e => setNewDb({...newDb, password: e.target.value})}
+                    placeholder="Enter strong password" 
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <div className="pt-4 flex gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setIsCreating(false)}
+                    className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 px-4 py-3 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/50 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors"
+                  >
+                    Create
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {dbToDelete && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDbToDelete(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#0a0a0a] border border-rose-500/30 rounded-2xl shadow-2xl overflow-hidden p-6 text-center"
+            >
+              <AlertTriangle className="w-12 h-12 text-rose-500 mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-white mb-2">Delete Database?</h2>
+              <p className="text-slate-400 text-sm mb-6">
+                Are you sure you want to delete <strong className="text-white">{dbToDelete.name}</strong>? This action cannot be undone and will permanently erase all data within this database.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setDbToDelete(null)}
+                  className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-3 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/50 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
