@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   LayoutDashboard, 
   Terminal, 
@@ -29,7 +31,8 @@ import {
   Stethoscope,
   Wand2,
   Clock,
-  HardDrive
+  HardDrive,
+  ChevronDown
 } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { useLanguage } from './language-provider';
@@ -38,6 +41,7 @@ import { LanguageSwitcher } from './language-switcher';
 const navGroups = [
   {
     titleKey: 'group.core_ai',
+    icon: Bot,
     items: [
       { nameKey: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
       { nameKey: 'nav.ai_utilities', href: '/ai-utilities', icon: Wand2, free: true },
@@ -51,6 +55,7 @@ const navGroups = [
   },
   {
     titleKey: 'group.management',
+    icon: Server,
     items: [
       { nameKey: 'nav.servers', href: '/servers', icon: Server },
       { nameKey: 'nav.websites', href: '/websites', icon: Globe },
@@ -60,10 +65,12 @@ const navGroups = [
       { nameKey: 'nav.files', href: '/files', icon: FolderOpen },
       { nameKey: 'nav.docker', href: '/docker', icon: Container },
       { nameKey: 'nav.marketplace', href: '/marketplace', icon: ShoppingBag },
+      { nameKey: 'nav.backups', href: '/backups', icon: HardDrive },
     ]
   },
   {
     titleKey: 'group.system',
+    icon: Terminal,
     items: [
       { nameKey: 'nav.terminal', href: '/terminal', icon: Terminal },
       { nameKey: 'nav.cron', href: '/cron', icon: Clock },
@@ -76,13 +83,16 @@ const navGroups = [
   },
   {
     titleKey: 'group.security',
+    icon: ShieldCheck,
     items: [
       { nameKey: 'nav.security_auditor', href: '/security-auditor', icon: ShieldCheck },
       { nameKey: 'nav.security', href: '/security', icon: ShieldAlert },
+      { nameKey: 'nav.firewall', href: '/firewall', icon: ShieldCheck },
     ]
   },
   {
     titleKey: 'group.config',
+    icon: Settings,
     items: [
       { nameKey: 'nav.settings', href: '/settings', icon: Settings },
     ]
@@ -103,6 +113,34 @@ export function Sidebar({
   const pathname = usePathname();
   const { logout } = useAuth();
   const { t } = useLanguage();
+  
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+
+  // Auto-expand the group that contains the current active path
+  useEffect(() => {
+    const activeGroup = navGroups.find(group => 
+      group.items.some(item => item.href === pathname)
+    );
+    if (activeGroup && !expandedGroups.includes(activeGroup.titleKey)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setExpandedGroups(prev => [...prev, activeGroup.titleKey]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  const toggleGroup = (titleKey: string) => {
+    if (isCollapsed && !isOpen) {
+      setIsCollapsed(false);
+      setExpandedGroups([titleKey]);
+      return;
+    }
+    
+    setExpandedGroups(prev => 
+      prev.includes(titleKey) 
+        ? prev.filter(k => k !== titleKey)
+        : [...prev, titleKey]
+    );
+  };
 
   return (
     <>
@@ -137,49 +175,77 @@ export function Sidebar({
           </div>
         </div>
         
-        <nav className="flex-1 px-4 space-y-6 overflow-y-auto overflow-x-hidden custom-scrollbar pb-8">
-          {navGroups.map((group) => (
-            <div key={group.titleKey} className="space-y-2">
-              {(!isCollapsed || isOpen) && (
-                <h3 className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">
-                  {t(group.titleKey)}
-                </h3>
-              )}
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.nameKey}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      title={isCollapsed ? t(item.nameKey) : undefined}
-                      className={`flex items-center gap-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        isCollapsed && !isOpen ? 'lg:justify-center px-0' : 'px-3'
-                      } ${
-                        isActive 
-                          ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]' 
-                          : 'text-slate-400 hover:text-cyan-300 hover:bg-white/5 border border-transparent'
-                      }`}
+        <nav className="flex-1 px-3 space-y-2 overflow-y-auto overflow-x-hidden custom-scrollbar pb-8">
+          {navGroups.map((group) => {
+            const isExpanded = expandedGroups.includes(group.titleKey);
+            const hasActiveItem = group.items.some(item => item.href === pathname);
+            
+            return (
+              <div key={group.titleKey} className="space-y-1">
+                <button
+                  onClick={() => toggleGroup(group.titleKey)}
+                  title={isCollapsed && !isOpen ? t(group.titleKey) : undefined}
+                  className={`w-full flex items-center gap-3 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+                    isCollapsed && !isOpen ? 'lg:justify-center px-0' : 'px-3'
+                  } ${
+                    hasActiveItem && !isExpanded
+                      ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white border border-transparent'
+                  }`}
+                >
+                  <group.icon className={`w-5 h-5 shrink-0 ${hasActiveItem && !isExpanded ? 'text-cyan-400' : 'text-slate-400'}`} />
+                  
+                  {(!isCollapsed || isOpen) && (
+                    <>
+                      <span className="flex-1 text-left truncate tracking-wide">{t(group.titleKey)}</span>
+                      <ChevronDown 
+                        className={`w-4 h-4 text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+                      />
+                    </>
+                  )}
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isExpanded && (!isCollapsed || isOpen) && (
+                    <motion.initial
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      className="overflow-hidden"
                     >
-                      <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
-                      {(!isCollapsed || isOpen) && (
-                        <>
-                          <span className="truncate">{t(item.nameKey)}</span>
-                          {(item as any).pro && (
-                            <span className="ml-auto text-[8px] font-black bg-gradient-to-r from-amber-400 to-rose-500 text-black px-1.5 py-0.5 rounded-full tracking-tighter">PRO</span>
-                          )}
-                          {(item as any).free && (
-                            <span className="ml-auto text-[8px] font-black bg-gradient-to-r from-emerald-400 to-cyan-500 text-black px-1.5 py-0.5 rounded-full tracking-tighter">FREE</span>
-                          )}
-                        </>
-                      )}
-                    </Link>
-                  );
-                })}
+                      <div className="pt-1 pb-2 space-y-1">
+                        {group.items.map((item) => {
+                          const isActive = pathname === item.href;
+                          return (
+                            <Link
+                              key={item.nameKey}
+                              href={item.href}
+                              onClick={() => setIsOpen(false)}
+                              className={`flex items-center gap-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 pl-11 pr-3 ${
+                                isActive 
+                                  ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]' 
+                                  : 'text-slate-400 hover:text-cyan-300 hover:bg-white/5 border border-transparent'
+                              }`}
+                            >
+                              <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
+                              <span className="truncate">{t(item.nameKey)}</span>
+                              {(item as any).pro && (
+                                <span className="ml-auto text-[8px] font-black bg-gradient-to-r from-amber-400 to-rose-500 text-black px-1.5 py-0.5 rounded-full tracking-tighter">PRO</span>
+                              )}
+                              {(item as any).free && (
+                                <span className="ml-auto text-[8px] font-black bg-gradient-to-r from-emerald-400 to-cyan-500 text-black px-1.5 py-0.5 rounded-full tracking-tighter">FREE</span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.initial>
+                  )}
+                </AnimatePresence>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t border-cyan-500/20 space-y-4">

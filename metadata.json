@@ -1,5 +1,0 @@
-{
-  "name": "FYOR AI SERVER OS",
-  "description": "An autonomous AI-powered VPS control panel with realtime monitoring, terminal, FTP, and Domain/SSL management.",
-  "requestFramePermissions": ["microphone"]
-}
